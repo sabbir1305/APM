@@ -1,5 +1,7 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Subscription } from "rxjs";
 import { IProduct } from "./product";
+import { ProductService } from "./product.service";
 
 
 @Component({
@@ -7,15 +9,20 @@ import { IProduct } from "./product";
   templateUrl:'./product-list.component.html',
   styleUrls:['./product-list.component.css']
 })
-export class ProductListComponent implements  OnInit{
+export class ProductListComponent implements  OnInit,OnDestroy{
 
 
   imageWidth:number=50;
   imageMargin:number=2;
   pageTitle:string = "Product List";
   showImage = false;
-
+  error:string='';
   private _listFilter :string='';
+  sub!:Subscription;
+constructor (private productService:ProductService){}
+
+
+
   get listFilter():string{
     return this._listFilter;
   }
@@ -24,35 +31,24 @@ export class ProductListComponent implements  OnInit{
     this.filteredProduct = this.performFilter(value);
   }
   filteredProduct:IProduct[]=[];
-  products:IProduct[]=[
-    {
-      "productId": 1,
-      "productName": "Leaf Rake",
-      "productCode": "GDN-0011",
-      "releaseDate": "March 19, 2021",
-      "description": "Leaf rake with 48-inch wooden handle.",
-      "price": 19.95,
-      "starRating": 3.2,
-      "imageUrl": "assets/images/leaf_rake.png"
-    },
-    {
-      "productId": 2,
-      "productName": "Garden Cart",
-      "productCode": "GDN-0023",
-      "releaseDate": "March 18, 2021",
-      "description": "15 gallon capacity rolling garden cart",
-      "price": 32.99,
-      "starRating": 4.2,
-      "imageUrl": "assets/images/garden_cart.png"
-    }
-  ];
+  products:IProduct[]=[];
 
   toggleImage():void{
     this.showImage=!this.showImage;
   }
   ngOnInit(): void {
-    this.listFilter='cart';
- //   this.filteredProduct = this.performFilter( this.listFilter);
+    this.sub= this.productService.getProducts().subscribe({
+       next : products =>{
+        this.products=products;
+        this.filteredProduct = this.products;
+       } ,
+       error: err=>this.error=err
+     })
+
+
+  }
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
   performFilter(filterBy: string): IProduct[] {
     filterBy = filterBy.toLowerCase();
