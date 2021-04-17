@@ -5,6 +5,8 @@ import { ConvertToSpacesPipe } from '../shared/convert-to-spaces.pipe';
 import { RouterModule } from '@angular/router';
 import { ProductDetailGuard } from './product-detail.guard';
 import { SharedModule } from '../shared/shared.module';
+import { ProductEditComponent } from './product-edit.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -13,7 +15,8 @@ import { SharedModule } from '../shared/shared.module';
 
     ProductListComponent,
     ProductDetailComponent,
-    ConvertToSpacesPipe
+    ConvertToSpacesPipe,
+    ProductEditComponent
 
   ],
   imports: [
@@ -27,8 +30,15 @@ import { SharedModule } from '../shared/shared.module';
       component:ProductDetailComponent
 
     },
+    {
+      path:'products/:id/edit',
+      canDeactivate:[ProductEditGuard],
+      component:ProductEditComponent
+    }
     ]),
-    SharedModule
+    SharedModule,
+    ReactiveFormsModule,
+    InMemoryWebApiModule.forRoot(ProductData)
   ]
 })
 export class ProductModule { }
